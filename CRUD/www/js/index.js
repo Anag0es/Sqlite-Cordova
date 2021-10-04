@@ -1,29 +1,53 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
-// Wait for the deviceready event before using any of Cordova's device APIs.
-// See https://cordova.apache.org/docs/en/latest/cordova/events/events.html#deviceready
 document.addEventListener('deviceready', onDeviceReady, false);
 
-function onDeviceReady() {
-    // Cordova is now initialized. Have fun!
+let banco;
 
-    console.log('Running cordova-' + cordova.platformId + '@' + cordova.version);
-    document.getElementById('deviceready').classList.add('ready');
+function insert(){
+    console.log("Function insert...");
+    let login = document.getElementById("txtusuario").value;
+    let pass = document.getElementById("txtsenha").value;
+
+    banco.transaction(
+        function(tx){
+            tx.executeSql("INSERT INTO usuarios VALUES (?,?)", [login, pass]);
+        },
+        function(error){
+            alert("ERROR durente a transacao com o banco: " + error.message);
+        },
+        function(){
+            alert("Transacao realizada com sucesso!!");
+        }
+    );
 }
+
+function listen(){
+    console.log("Fucntion listen...");
+
+    banco.executeSql(
+        "SELECT login AS uLoginName, pass AS uPassword FROM usuarios", [], function(txt, rs){
+            alert(JSON.stringify(rs));
+            alert(rs.rows.lenght);
+            let h = 0;
+            for(h = 0; h < rs.rows.lenght; h++){
+                alert("Item: " +h);
+                let recordItem = rs.rows.item(h);
+                console.log(JSON.stringify(recordItem));
+            }
+
+        },
+        function(error){
+            alert("ERROR no Select: " + error.message);
+    });
+}
+
+function startDb(){
+
+}
+
+function onDeviceReady() {
+    startDb();
+
+    document.getElementById("insert").addEventListener("click", insert);
+    document.getElementById("listen").addEventListener("click", listen);
+}
+
